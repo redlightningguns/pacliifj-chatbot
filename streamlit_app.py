@@ -1,31 +1,34 @@
 import streamlit as st
 import requests
 
-st.title("Legal Research Chatbot (Ollama)")
+st.title("Legal Research Chatbot (OpenRouter.ai)")
 
 user_input = st.text_area("Enter your legal question:")
 
-def ask_ollama(prompt):
+OPENROUTER_API_KEY = "YOUR-OPENROUTER-KEY-HERE"  # Replace with your API Key
+
+def ask_openrouter(prompt):
     try:
-        response = requests.post(
-            "http://YOUR-OLLAMA-URL-HERE/api/chat",  # Replace this with your Ollama exposed URL
-            json={
-                "model": "llama3",
-                "messages": [{"role": "user", "content": prompt}]
-            },
-            timeout=60
-        )
+        headers = {
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json"
+        }
+        data = {
+            "model": "mistral/mistral-7b-instruct",  # You can change the model if you prefer
+            "messages": [{"role": "user", "content": prompt}],
+        }
+        response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=data, timeout=60)
         if response.status_code == 200:
             result = response.json()
-            return result["message"]["content"]
+            return result["choices"][0]["message"]["content"]
         else:
-            return f"Ollama returned an error: {response.status_code}"
+            return f"OpenRouter returned error {response.status_code}: {response.text}"
     except Exception as e:
         return f"Error: {e}"
 
 if st.button("Ask"):
     if user_input.strip():
         st.write("### AI Response:")
-        st.write(ask_ollama(user_input))
+        st.write(ask_openrouter(user_input))
     else:
         st.warning("Please type your question.")
