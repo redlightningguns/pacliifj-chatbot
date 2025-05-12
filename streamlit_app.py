@@ -1,48 +1,50 @@
-import os
 import streamlit as st
 import requests
 
-# Set page title
-st.set_page_config(page_title="Legal Research Chat - Gemini 2.5 Pro", page_icon="⚖️")
+# Hardcoding the OpenRouter API Key (Don't share this key publicly)
+OPENROUTER_API_KEY = "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"  # Replace this with your key
 
-# App title
-st.title("⚖️ Legal Research Chat (Gemini 2.5 Pro Experimental via OpenRouter)")
+# List of available models (you can customize this based on what OpenRouter supports)
+available_models = [
+    "google/gemini-2.5-pro-exp-03-25",  # Example Gemini model
+    "openai/gpt-4",  # Example GPT model
+    "openai/gpt-3.5-turbo",  # Another example
+]
 
-# Get your OpenRouter API Key from environment variable
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+# Streamlit interface
+st.title("Legal Research Chatbot")
+st.markdown("Select a model and start chatting!")
 
-# Check if API key exists
-if not OPENROUTER_API_KEY:
-    st.error("API key not found! Please set OPENROUTER_API_KEY in your app secrets or environment variables.")
-else:
-    # User input
-    user_input = st.text_area("🔎 Ask your legal research question:", height=150)
+# Model selection dropdown
+selected_model = st.selectbox("Choose a model", available_models)
 
-    if st.button("Ask Gemini 2.5 Pro") and user_input.strip() != "":
-        with st.spinner("🤖 Gemini is thinking..."):
-            headers = {
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Content-Type": "application/json"
-            }
+# User input for the chat
+user_input = st.text_input("Ask a legal question:")
 
-            payload = {
-                "model": "google/gemini-2.5-pro-exp-03-25",
-                "messages": [
-                    {"role": "system", "content": "You are a professional legal research assistant. Use clear and simple legal language."},
-                    {"role": "user", "content": user_input}
-                ],
-                "stream": False
-            }
+# Function to get response from OpenRouter
+def get_response_from_openrouter(model, user_input):
+    url = f"https://api.openrouter.ai/v1/completions"
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    data = {
+        "model": model,
+        "prompt": user_input,
+        "max_tokens": 150,
+        "temperature": 0.7,
+    }
 
-            try:
-                response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=payload)
+    response = requests.post(url, headers=headers, json=data)
+    response_data = response.json()
 
-                if response.status_code == 200:
-                    result = response.json()
-                    answer = result["choices"][0]["message"]["content"]
-                    st.success(answer)
-                else:
-                    st.error(f"❌ Failed: {response.status_code} - {response.text}")
+    if response.status_code == 200:
+        return response_data['choices'][0]['text'].strip()
+    else:
+        return f"Error: {response_data.get('error', {}).get('message', 'Something went wrong!')}"
 
-            except Exception as e:
-                st.error(f"⚠️ Error: {e}")
+# Display the response when the user submits input
+if user_input:
+    st.write("Thinking...")
+    result = get_response_from_openrouter(selected_model, user_input)
+    st.write(result)
