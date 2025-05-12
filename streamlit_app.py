@@ -10,7 +10,7 @@ OPENROUTER_API_KEY = "sk-or-v1-5301934d8b1cf52132d940bd329e39a6fbd08e30833ccd6fe
 def ask_openrouter(prompt):
     try:
         headers = {
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Authorization": f"Bearer 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",
             "Content-Type": "application/json"
         }
         data = {
