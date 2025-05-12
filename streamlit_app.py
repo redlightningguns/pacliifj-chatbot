@@ -1,20 +1,22 @@
 import streamlit as st
 import requests
+import os
 
 st.title("Legal Research Chatbot (OpenRouter.ai)")
 
 user_input = st.text_area("Enter your legal question:")
 
-OPENROUTER_API_KEY = "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"  
+# Use your actual API key
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "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.")
 
 def ask_openrouter(prompt):
     try:
         headers = {
-            "Authorization": f"Bearer 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",
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
             "Content-Type": "application/json"
         }
         data = {
-            "model": "mistral/mistral-7b-instruct",  # You can change the model if you prefer
+            "model": "mistral/mistral-7b-instruct",  # Example model, you can change to any supported one
             "messages": [{"role": "user", "content": prompt}],
         }
         response = requests.post("https://openrouter.ai/api/v1/chat/completions", headers=headers, json=data, timeout=60)
