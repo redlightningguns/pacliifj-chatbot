@@ -5,7 +5,7 @@ st.title("Legal Research Chatbot (OpenRouter.ai)")
 
 user_input = st.text_area("Enter your legal question:")
 
-OPENROUTER_API_KEY = "YOUR-OPENROUTER-KEY-HERE"  # Replace with your API Key
+OPENROUTER_API_KEY = "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"  
 
 def ask_openrouter(prompt):
     try:
